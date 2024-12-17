@@ -5,7 +5,9 @@ import { AppService } from './app.service';
 import { CurrencyModule } from './currency/currency.module';
 
 @Module({
-  imports: [CurrencyModule],
+  imports: [
+    CurrencyModule,
+  ],
   controllers: [AppController],
   providers: [AppService],
 })
