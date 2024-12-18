@@ -1,9 +1,18 @@
 import { Injectable } from '@nestjs/common';
 
+export interface IExchangeRate {
+  currencyCodeA: number;
+  currencyCodeB: number;
+  date: number;
+  rateBuy?: number;
+  rateSell?: number;
+  rateCross?: number;
+}
+
 @Injectable()
 export class ExchangeService {
   convert(
-    exchangeRates: any,
+    exchangeRates: IExchangeRate[],
     sourceCurrencyCode: number,
     targetCurrencyCode: number,
     amount: number,

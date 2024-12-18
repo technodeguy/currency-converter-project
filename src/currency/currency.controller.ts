@@ -1,4 +1,10 @@
-import { Body, Controller, HttpCode, Post, UseInterceptors } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  HttpCode,
+  Post,
+  UseInterceptors,
+} from '@nestjs/common';
 import { CacheInterceptor } from '@nestjs/cache-manager';
 
 import { CurrencyService } from './currency.service';

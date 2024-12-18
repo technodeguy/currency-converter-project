@@ -23,12 +23,12 @@ import config from './config';
           socket: {
             host: config.get('redis.host'),
             port: config.get('redis.port'),
-          }
+          },
         });
         return { store };
       },
       inject: [ConfigService],
-    })
+    }),
   ],
   controllers: [AppController],
   providers: [AppService],
