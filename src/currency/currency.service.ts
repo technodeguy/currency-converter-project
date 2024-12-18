@@ -1,4 +1,6 @@
 import { BadRequestException, Inject, Injectable, NotFoundException } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
+import { Cache } from 'cache-manager';
 
 import { ExchangeService } from './exchange.service';
 import { HttpService } from '../currency/http.service';
@@ -15,15 +17,33 @@ export class CurrencyService {
     private exchangeService: ExchangeService,
     @Inject('CustomHttpService')
     private readonly httpService: HttpService,
+    @Inject('CACHE_MANAGER')
+    private readonly cacheService: Cache,
+    private configService: ConfigService
   ) {}
 
   async fetchCurrencyRates() {
     try {
-      const response = await this.httpService.get('https://api.monobank.ua/bank/currency');
+      const response = await this.httpService.get(this.configService.get('monobankApiUrl'));
       return response.data;
     } catch (err) {
       return null;
     }
+  }
+
+  async retrieveRatesFromStorage() {
+    const cachedRates = await this.cacheService.get('rates');
+
+    if (!cachedRates) {
+      const rates = await this.fetchCurrencyRates();
+      if (!rates) {
+        throw new BadRequestException('Exchange rates are not found. Try again later');
+      }
+      await this.cacheService.set('rates', rates);
+      return rates;
+    }
+
+    return cachedRates;
   }
 
   async convert({
@@ -31,10 +51,9 @@ export class CurrencyService {
     targetCurrencyCode,
     amount,
   }: ExchangeCurrenciesType) {
-    const data = await this.fetchCurrencyRates();
-    if (!data) {
-      throw new BadRequestException('Exchange rates are not found. Try again later');
-    }
+
+    const data = await this.retrieveRatesFromStorage();
+
     const response = this.exchangeService.convert(data, sourceCurrencyCode, targetCurrencyCode, amount);
     
     if (response === -1) {
